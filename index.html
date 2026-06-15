@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kaleidos — Open Source Design Prototyping Hub</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Top Navigation -->
+        <header class="app-header">
+            <div class="header-logo">
+                <div class="logo-icon"></div>
+                <div class="logo-text">
+                    <span class="logo-title">KALEIDOS</span>
+                    <span class="logo-subtitle">Open Source Prototyping Hub</span>
+                </div>
+            </div>
+            
+            <nav class="app-nav">
+                <button class="nav-tab active" data-tab="canvas-tab">
+                    <i data-lucide="layout"></i>
+                    <span>Penpot Board</span>
+                </button>
+                <button class="nav-tab" data-tab="board-tab">
+                    <i data-lucide="kanban"></i>
+                    <span>Taiga Sync</span>
+                </button>
+                <button class="nav-tab" data-tab="colors-tab">
+                    <i data-lucide="palette"></i>
+                    <span>System Themes</span>
+                </button>
+                <button class="nav-tab" data-tab="events-tab">
+                    <i data-lucide="calendar"></i>
+                    <span>Events Hub</span>
+                </button>
+            </nav>
+            
+            <div class="header-actions">
+                <div class="active-users">
+                    <span class="user-avatar" style="background-color: var(--accent-pink);">E</span>
+                    <span class="user-avatar" style="background-color: var(--accent-cyan);">A</span>
+                    <span class="user-avatar" style="background-color: var(--accent-lime);">S</span>
+                    <span class="user-avatar current-user">Tú</span>
+                    <span class="users-count">+3 colaborando</span>
+                </div>
+                <button class="btn btn-primary share-btn">
+                    <i data-lucide="share-2"></i>
+                    <span>Compartir</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Workspace Area -->
+        <main class="app-main">
+            <!-- Hero Announcement Banner (Dismissible) -->
+            <section class="hero-banner" id="heroBanner">
+                <div class="hero-content">
+                    <span class="hero-tag">PROTOTIPOS DE DISEÑO EN CÓDIGO ABIERTO</span>
+                    <h1>Diseño y código en perfecta sintonía</h1>
+                    <p>Bienvenido a <strong>Kaleidos</strong>. Explora prototipos experimentales de herramientas colaborativas multiplataforma, diseñados bajo estándares abiertos. Experimenta con la colaboración en tiempo real, tableros Kanban adaptables y código exportable instantáneamente.</p>
+                </div>
+                <button class="hero-close" id="closeHero" title="Cerrar banner">
+                    <i data-lucide="x"></i>
+                </button>
+            </section>
+
+            <!-- Tab 1: Design Canvas (Penpot Board) -->
+            <section id="canvas-tab" class="workspace-tab active-workspace">
+                <div class="workspace-grid">
+                    <!-- Left Toolbar -->
+                    <div class="canvas-toolbar">
+                        <button class="tool-btn active" data-tool="select" title="Seleccionar">
+                            <i data-lucide="mouse-pointer"></i>
+                        </button>
+                        <span class="tool-divider"></span>
+                        <button class="tool-btn" data-tool="rect" title="Rectángulo">
+                            <i data-lucide="square"></i>
+                        </button>
+                        <button class="tool-btn" data-tool="circle" title="Círculo">
+                            <i data-lucide="circle"></i>
+                        </button>
+                        <button class="tool-btn" data-tool="triangle" title="Triángulo">
+                            <i data-lucide="triangle"></i>
+                        </button>
+                        <button class="tool-btn" data-tool="star" title="Estrella">
+                            <i data-lucide="star"></i>
+                        </button>
+                        <button class="tool-btn" data-tool="pencil" title="Lápiz de dibujo">
+                            <i data-lucide="pencil"></i>
+                        </button>
+                        <span class="tool-divider"></span>
+                        <button class="tool-btn danger-tool" id="clearCanvas" title="Limpiar Canvas">
+                            <i data-lucide="trash-2"></i>
+                        </button>
+                    </div>
+
+                    <!-- Interactive Canvas Area -->
+                    <div class="canvas-viewport">
+                        <div class="canvas-ruler horizontal"></div>
+                        <div class="canvas-ruler vertical"></div>
+                        <div class="canvas-container" id="canvasContainer">
+                            <!-- Infinite grid background svg/css -->
+                            <div class="canvas-grid-bg"></div>
+                            
+                            <!-- SVG Drawing Layer for freehand drawing paths -->
+                            <svg id="svgDrawLayer" class="canvas-svg-layer" viewBox="0 0 1400 900" width="1400" height="900" style="position: absolute; top:0; left:0; width:100%; height:100%; pointer-events: none; z-index: 15;"></svg>
+                            
+                            <!-- Drawing Surface -->
+                            <div class="canvas-artboard" id="artboard">
+                                <!-- Shapes will be appended here dynamically -->
+                                <div class="canvas-placeholder-text" id="canvasPlaceholder">
+                                    <i data-lucide="sparkles"></i>
+                                    <h3>Lienzo de Diseño Colaborativo</h3>
+                                    <p>Selecciona una herramienta de la izquierda y haz clic en el lienzo para crear elementos.</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Simulated Collaboration Cursors -->
+                            <div class="simulated-cursor" id="cursorElena" style="top: 150px; left: 300px;">
+                                <svg class="cursor-pointer" viewBox="0 0 24 24" fill="var(--accent-pink)" stroke="#fff" stroke-width="1.5">
+                                    <path d="M4.5 3v15.2l3.8-3.8 3.5 8.1 3-1.3-3.5-8.1 5.3-.3L4.5 3z"/>
+                                </svg>
+                                <span class="cursor-label" style="background-color: var(--accent-pink);">Elena (Diseñadora)</span>
+                            </div>
+                            
+                            <div class="simulated-cursor" id="cursorAlex" style="top: 400px; left: 600px;">
+                                <svg class="cursor-pointer" viewBox="0 0 24 24" fill="var(--accent-cyan)" stroke="#fff" stroke-width="1.5">
+                                    <path d="M4.5 3v15.2l3.8-3.8 3.5 8.1 3-1.3-3.5-8.1 5.3-.3L4.5 3z"/>
+                                </svg>
+                                <span class="cursor-label" style="background-color: var(--accent-cyan);">Alex (PM)</span>
+                            </div>
+                        </div>
+
+                        <!-- Floating Accessibility Hub (Intérprete Virtual, Lengua de Signos y Braille) -->
+                        <div class="accessibility-hub" id="accessibilityHub">
+                            <div class="hub-header" id="hubHeader">
+                                <div class="hub-title">
+                                    <i data-lucide="accessibility"></i>
+                                    <span>Centro de Accesibilidad</span>
+                                </div>
+                                <button class="hub-minimize" id="minimizeHub" title="Minimizar panel">
+                                    <i data-lucide="chevron-down"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="hub-body" id="hubBody">
+                                <!-- Circular Avatar Container mimicking interpreter webcam -->
+                                <div class="interpreter-avatar-container">
+                                    <div class="avatar-status-ring"></div>
+                                    <video id="webcamVideo" class="webcam-video" autoplay playsinline style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; display: none; z-index: 10; border-radius: var(--radius-md);"></video>
+                                    <svg class="interpreter-svg" id="interpreterSvg" viewBox="0 0 100 100" width="100%" height="100%">
+                                        <!-- Background circle -->
+                                        <circle cx="50" cy="50" r="48" fill="#151221" stroke="rgba(255,255,255,0.06)" stroke-width="2" />
+                                        <!-- Body (chest and shoulders) -->
+                                        <path d="M 18 92 Q 50 56 82 92 Z" fill="#2d2747" stroke="rgba(255,255,255,0.12)" stroke-width="1.5" />
+                                        <!-- Neck -->
+                                        <rect x="46" y="52" width="8" height="12" fill="#ffdbac" rx="2" />
+                                        <!-- Face -->
+                                        <ellipse cx="50" cy="40" rx="14" ry="16" fill="#ffdbac" />
+                                        <!-- Hair -->
+                                        <path d="M 33 40 Q 35 20 50 20 Q 65 20 67 40 Q 50 27 33 40 Z" fill="#292524" />
+                                        <!-- Eyes -->
+                                        <circle cx="45" cy="38" r="1.5" fill="#292524" />
+                                        <circle cx="55" cy="38" r="1.5" fill="#292524" />
+                                        <!-- Mouth (Smiling) -->
+                                        <path d="M 46 47 Q 50 50 54 47" fill="none" stroke="#e11d48" stroke-width="1.5" stroke-linecap="round" />
+                                        <!-- Left Arm / Hand (gesturing) -->
+                                        <g class="avatar-left-arm" id="avatarLeftArm">
+                                            <path d="M 28 75 Q 16 58 25 46" fill="none" stroke="#ffdbac" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" />
+                                            <!-- Left Hand -->
+                                            <circle cx="25" cy="46" r="3.5" fill="#ffdbac" />
+                                        </g>
+                                        <!-- Right Arm / Hand (gesturing) -->
+                                        <g class="avatar-right-arm" id="avatarRightArm">
+                                            <path d="M 72 75 Q 84 58 75 46" fill="none" stroke="#ffdbac" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" />
+                                            <!-- Right Hand -->
+                                            <circle cx="75" cy="46" r="3.5" fill="#ffdbac" />
+                                        </g>
+                                    </svg>
+                                    <!-- Audio pulsing waves overlay -->
+                                    <div class="audio-waves" id="audioWaves">
+                                        <span class="wave-bar"></span>
+                                        <span class="wave-bar"></span>
+                                        <span class="wave-bar"></span>
+                                        <span class="wave-bar"></span>
+                                        <span class="wave-bar"></span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Tab view for translation output -->
+                                <div class="hub-tabs">
+                                    <button class="hub-tab-btn active" data-hub-tab="tab-interpreter">Voz & Señas</button>
+                                    <button class="hub-tab-btn" data-hub-tab="tab-braille">Traducción Braille</button>
+                                </div>
+                                
+                                <!-- Output Content Tabs -->
+                                <div class="hub-tab-content active" id="tab-interpreter">
+                                    <!-- Real-time speech transcription & sign gloss -->
+                                    <div class="transcription-bubble">
+                                        <div class="bubble-header">
+                                            <span class="bubble-tag tag-speech"><i data-lucide="mic"></i> Transcripción</span>
+                                        </div>
+                                        <p class="transcription-text" id="speechTranscript">Idling... Activa el micrófono para iniciar traducción simultánea.</p>
+                                    </div>
+                                    <div class="transcription-bubble">
+                                        <div class="bubble-header">
+                                            <span class="bubble-tag tag-gloss"><i data-lucide="hand"></i> Lengua de Signos</span>
+                                        </div>
+                                        <p class="transcription-text text-gloss" id="signGloss">---</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="hub-tab-content" id="tab-braille">
+                                    <div class="transcription-bubble">
+                                        <div class="bubble-header">
+                                            <span class="bubble-tag tag-braille"><i data-lucide="binary"></i> Sistema Braille</span>
+                                        </div>
+                                        <p class="braille-output-dots" id="brailleTextDots">⠠⠇⠊⠎⠞⠕⠠⠠</p>
+                                    </div>
+                                    <!-- Manual braille input translator -->
+                                    <div class="manual-braille-box">
+                                        <label for="brailleInputText">Traductor Manual:</label>
+                                        <input type="text" id="brailleInputText" class="property-input" placeholder="Escribe aquí para traducir a Braille...">
+                                        <div class="braille-live-preview" id="brailleLivePreview">---</div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Accessibility Controls -->
+                                <div class="accessibility-controls">
+                                    <button class="btn btn-primary mic-toggle-btn" id="micToggleBtn" title="Traducir tu voz en tiempo real usando el micrófono">
+                                        <i data-lucide="mic"></i>
+                                        <span>Micrófono</span>
+                                    </button>
+                                    <button class="btn btn-secondary hover-toggle-btn" id="hoverReaderToggle" title="Activar audio y traducción al pasar el cursor">
+                                        <i data-lucide="eye"></i>
+                                        <span>Lector: Off</span>
+                                    </button>
+                                    <button class="btn btn-secondary camera-toggle-btn" id="cameraToggleBtn" title="Activar o desactivar cámara web en vivo">
+                                        <i data-lucide="video"></i>
+                                        <span>Cámara</span>
+                                    </button>
+                                    <button class="btn btn-accent demo-toggle-btn" id="demoToggleBtn" title="Iniciar presentación automática con traducción y lengua de signos">
+                                        <i data-lucide="play"></i>
+                                        <span>Simular Demo</span>
+                                    </button>
+                                </div>
+                                
+                                <!-- Ajuste de Tamaño de Letra (Accesibilidad) -->
+                                <div class="font-size-adjuster" style="margin-top: 10px; padding: 10px 12px; background: rgba(0,0,0,0.2); border-radius: var(--radius-sm); border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 6px;">
+                                    <label style="font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.8px; display: flex; justify-content: space-between; align-items: center; user-select: none;">
+                                        <span>Tamaño de Letra</span>
+                                        <span id="fontSizeVal" style="color: var(--accent-cyan); font-weight: 800;">100%</span>
+                                    </label>
+                                    <div style="display: flex; gap: 6px; align-items: center; justify-content: space-between;">
+                                        <button class="btn btn-secondary" id="fontDecBtn" style="padding: 0; height: 30px; width: 30px; font-size: 1.1rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); cursor: pointer;" title="Disminuir tamaño de letra">-</button>
+                                        <button class="btn btn-secondary" id="fontResetBtn" style="flex: 1; padding: 0 4px; height: 30px; font-size: 0.68rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px;" title="Restablecer tamaño original">Reset</button>
+                                        <button class="btn btn-secondary" id="fontIncBtn" style="padding: 0; height: 30px; width: 30px; font-size: 1.1rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); cursor: pointer;" title="Aumentar tamaño de letra">+</button>
+                                    </div>
+                                </div>
+
+                                <div class="audio-notice" style="color: #f43f5e; font-size: 0.8rem; margin-top: 12px; text-align: center; font-weight: 500; line-height: 1.4; padding: 10px; border: 1px dashed rgba(244, 63, 94, 0.3); border-radius: 6px; background: rgba(244, 63, 94, 0.05); text-shadow: 0 1px 2px rgba(0,0,0,0.5);">
+                                    Audio No Disponible en este momento, se encuentra en proceso de construcción. Disculpe las molestias. Estamos trabajando en ello. Tenga un poco de paciencia. Por favor, gracias. Saludos, la creadora.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Inspector Panel -->
+                    <div class="sidebar-inspector">
+                        <div class="sidebar-section">
+                            <h3>Elemento Seleccionado</h3>
+                            <div class="inspector-item no-selection-msg" id="noSelectionMsg">
+                                Selecciona un elemento del lienzo para editar sus propiedades.
+                            </div>
+                            
+                            <div class="inspector-properties" id="inspectorProperties" style="display: none;">
+                                <div class="property-group">
+                                    <label for="shapeX">Posición X (px)</label>
+                                    <input type="number" id="shapeX" class="property-input">
+                                </div>
+                                <div class="property-group">
+                                    <label for="shapeY">Posición Y (px)</label>
+                                    <input type="number" id="shapeY" class="property-input">
+                                </div>
+                                <div class="property-group">
+                                    <label for="shapeW">Ancho / Largo (px)</label>
+                                    <input type="number" id="shapeW" class="property-input">
+                                </div>
+                                <div class="property-group">
+                                    <label for="shapeH">Alto (px)</label>
+                                    <input type="number" id="shapeH" class="property-input">
+                                </div>
+                                <div class="property-group" id="propColorGroup">
+                                    <label for="shapeFill">Color de Relleno / Línea</label>
+                                    <div class="color-picker-wrapper">
+                                        <input type="color" id="shapeFill" class="property-color">
+                                        <input type="text" id="shapeFillHex" class="property-input text-upper" maxlength="7">
+                                    </div>
+                                </div>
+                                <div class="property-group" id="propGradientToggleGroup">
+                                    <label class="checkbox-label" style="display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none;">
+                                        <input type="checkbox" id="useGradient" style="width: 16px; height: 16px; accent-color: var(--primary);">
+                                        <span>Usar Relleno Degradado</span>
+                                    </label>
+                                </div>
+                                <div class="property-group" id="propColor2Group" style="display: none;">
+                                    <label for="shapeFill2">Color de Fin</label>
+                                    <div class="color-picker-wrapper">
+                                        <input type="color" id="shapeFill2" class="property-color" value="#a855f7">
+                                        <input type="text" id="shapeFill2Hex" class="property-input text-upper" value="#A855F7" maxlength="7">
+                                    </div>
+                                </div>
+                                <div class="property-group">
+                                    <label for="shapeOpacity">Opacidad (%)</label>
+                                    <input type="range" id="shapeOpacity" min="0" max="100" value="100" class="property-slider">
+                                    <span class="slider-val" id="opacityVal">100%</span>
+                                </div>
+                                <div class="property-group" id="propStrokeGroup" style="display: none;">
+                                    <label for="shapeStroke">Grosor de Línea (px)</label>
+                                    <input type="range" id="shapeStroke" min="1" max="20" value="4" class="property-slider">
+                                    <span class="slider-val" id="strokeVal">4px</span>
+                                </div>
+                                <div class="property-group" id="propRadiusGroup">
+                                    <label for="shapeRadius">Radio de Borde (px)</label>
+                                    <input type="range" id="shapeRadius" min="0" max="100" value="8" class="property-slider">
+                                    <span class="slider-val" id="radiusVal">8px</span>
+                                </div>
+                                <div class="property-group" id="propTextGroup" style="display: none;">
+                                    <label for="shapeText">Contenido de Texto</label>
+                                    <textarea id="shapeText" class="property-input" rows="3"></textarea>
+                                </div>
+                                <div class="property-group">
+                                    <label>Colores Rápidos</label>
+                                    <div class="color-presets" style="display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; margin-top: 4px;">
+                                        <span class="preset-color" style="background-color: #f43f5e; width: 22px; height: 22px; border-radius: 4px; cursor: pointer; border: 1px solid rgba(255,255,255,0.15);" data-preset="#f43f5e"></span>
+                                        <span class="preset-color" style="background-color: #ec4899; width: 22px; height: 22px; border-radius: 4px; cursor: pointer; border: 1px solid rgba(255,255,255,0.15);" data-preset="#ec4899"></span>
+                                        <span class="preset-color" style="background-color: #06b6d4; width: 22px; height: 22px; border-radius: 4px; cursor: pointer; border: 1px solid rgba(255,255,255,0.15);" data-preset="#06b6d4"></span>
+                                        <span class="preset-color" style="background-color: #84cc16; width: 22px; height: 22px; border-radius: 4px; cursor: pointer; border: 1px solid rgba(255,255,255,0.15);" data-preset="#84cc16"></span>
+                                        <span class="preset-color" style="background-color: #a855f7; width: 22px; height: 22px; border-radius: 4px; cursor: pointer; border: 1px solid rgba(255,255,255,0.15);" data-preset="#a855f7"></span>
+                                        <span class="preset-color" style="background-color: #f97316; width: 22px; height: 22px; border-radius: 4px; cursor: pointer; border: 1px solid rgba(255,255,255,0.15);" data-preset="#f97316"></span>
+                                        <span class="preset-color" style="background-color: #f8fafc; width: 22px; height: 22px; border-radius: 4px; cursor: pointer; border: 1px solid rgba(255,255,255,0.15);" data-preset="#f8fafc"></span>
+                                        <span class="preset-color" style="background-color: #000000; width: 22px; height: 22px; border-radius: 4px; cursor: pointer; border: 1px solid rgba(255,255,255,0.15);" data-preset="#000000"></span>
+                                    </div>
+                                </div>
+                                <div class="property-group">
+                                    <label>Contraste Accesible (A11y)</label>
+                                    <div class="contrast-badge-wrapper">
+                                        <div class="contrast-badge" id="contrastBadge">Calculando...</div>
+                                        <span class="contrast-description" id="contrastDesc">Contraste sobre fondo oscuro</span>
+                                    </div>
+                                </div>
+                                <button class="btn btn-danger btn-full" id="deleteSelected">
+                                    <i data-lucide="trash"></i>
+                                    <span>Eliminar Elemento</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Collaborative Activity Feed Inside Inspector -->
+                        <div class="sidebar-section border-top">
+                            <h3>Actividad Reciente</h3>
+                            <div class="activity-feed" id="activityFeed">
+                                <div class="feed-item">
+                                    <div class="feed-marker" style="background-color: var(--accent-pink);"></div>
+                                    <div class="feed-info">
+                                        <p><strong>Elena</strong> añadió un rectángulo de branding</p>
+                                        <span class="feed-time">Hace un momento</span>
+                                    </div>
+                                </div>
+                                <div class="feed-item">
+                                    <div class="feed-marker" style="background-color: var(--accent-cyan);"></div>
+                                    <div class="feed-info">
+                                        <p><strong>Alex</strong> unió la sesión de diseño</p>
+                                        <span class="feed-time">Hace 3 min</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom Code Output Drawer -->
+                <div class="code-drawer">
+                    <div class="drawer-header">
+                        <div class="drawer-tabs">
+                            <button class="drawer-tab active" data-code-format="css">
+                                <i data-lucide="css3"></i>
+                                <span>CSS & HTML</span>
+                            </button>
+                            <button class="drawer-tab" data-code-format="svg">
+                                <i data-lucide="code"></i>
+                                <span>Estándar SVG</span>
+                            </button>
+                            <button class="drawer-tab" data-code-format="json">
+                                <i data-lucide="database"></i>
+                                <span>JSON del Prototipo</span>
+                            </button>
+                        </div>
+                        <button class="btn btn-secondary btn-sm" id="copyCodeBtn">
+                            <i data-lucide="copy"></i>
+                            <span>Copiar Código</span>
+                        </button>
+                    </div>
+                    <div class="drawer-content">
+                        <pre><code id="codeOutput" class="language-css">/* Dibuja o selecciona un elemento para inspeccionar su código correspondiente */</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab 2: Kanban Board (Taiga Sync) -->
+            <section id="board-tab" class="workspace-tab">
+                <div class="board-workspace-container">
+                    <!-- Responsive Device Controls -->
+                    <div class="device-controls">
+                        <span class="controls-label">Previsualizar Multiplataforma:</span>
+                        <button class="device-btn active" data-device="desktop">
+                            <i data-lucide="monitor"></i>
+                            <span>Escritorio (Completo)</span>
+                        </button>
+                        <button class="device-btn" data-device="tablet">
+                            <i data-lucide="tablet"></i>
+                            <span>Tablet (iPad)</span>
+                        </button>
+                        <button class="device-btn" data-device="mobile">
+                            <i data-lucide="smartphone"></i>
+                            <span>Móvil (Adaptativo)</span>
+                        </button>
+                    </div>
+
+                    <!-- Mockup Wrapper containing Kanban Board -->
+                    <div class="device-mockup-wrapper desktop-mode" id="deviceMockup">
+                        <div class="mockup-frame">
+                            <div class="mockup-header-bar">
+                                <div class="mockup-dots">
+                                    <span class="mockup-dot red"></span>
+                                    <span class="mockup-dot yellow"></span>
+                                    <span class="mockup-dot green"></span>
+                                </div>
+                                <div class="mockup-url-bar">https://taiga.kaleidos.net/project/prototipos</div>
+                            </div>
+                            
+                            <!-- Inner Taiga Board -->
+                            <div class="taiga-board-inner">
+                                <div class="board-header">
+                                    <div class="board-title-group">
+                                        <h2>Tablero Taiga Sync</h2>
+                                        <p>Tareas en tiempo real compartidas entre equipos de diseño y desarrollo</p>
+                                    </div>
+                                    <button class="btn btn-accent" id="addTaskBtn">
+                                        <i data-lucide="plus"></i>
+                                        <span>Nueva Tarea</span>
+                                    </button>
+                                </div>
+
+                                <div class="kanban-board" id="kanbanBoard">
+                                    <!-- Column 1: Backlog / To Do -->
+                                    <div class="kanban-column" data-status="todo">
+                                        <div class="column-header">
+                                            <span class="column-indicator indicator-todo"></span>
+                                            <h3>Por Hacer</h3>
+                                            <span class="column-count" id="count-todo">3</span>
+                                        </div>
+                                        <div class="column-cards" id="column-todo">
+                                            <div class="kanban-card" draggable="true" data-task-id="task-1">
+                                                <div class="card-tags">
+                                                    <span class="card-tag tag-purple">Diseño</span>
+                                                </div>
+                                                <h4>Exportación de activos SVG</h4>
+                                                <p>Desarrollar prototipo de descarga automática de iconos vectoriales limpios.</p>
+                                                <div class="card-meta">
+                                                    <div class="card-assignee" style="background-color: var(--accent-pink);">E</div>
+                                                    <span class="card-priority priority-high">Alta</span>
+                                                </div>
+                                            </div>
+                                            <div class="kanban-card" draggable="true" data-task-id="task-2">
+                                                <div class="card-tags">
+                                                    <span class="card-tag tag-cyan">UX</span>
+                                                </div>
+                                                <h4>Gestos Multi-touch</h4>
+                                                <p>Definir interacciones de zoom y arrastre para pantallas móviles.</p>
+                                                <div class="card-meta">
+                                                    <div class="card-assignee" style="background-color: var(--accent-cyan);">A</div>
+                                                    <span class="card-priority priority-medium">Media</span>
+                                                </div>
+                                            </div>
+                                            <div class="kanban-card" draggable="true" data-task-id="task-3">
+                                                <div class="card-tags">
+                                                    <span class="card-tag tag-green">A11y</span>
+                                                </div>
+                                                <h4>Verificador de contraste de color</h4>
+                                                <p>Diseñar un widget que calcule contraste AA/AAA bajo estándares WCAG.</p>
+                                                <div class="card-meta">
+                                                    <div class="card-assignee" style="background-color: var(--accent-lime);">S</div>
+                                                    <span class="card-priority priority-high">Alta</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Column 2: In Progress -->
+                                    <div class="kanban-column" data-status="progress">
+                                        <div class="column-header">
+                                            <span class="column-indicator indicator-progress"></span>
+                                            <h3>En Desarrollo</h3>
+                                            <span class="column-count" id="count-progress">2</span>
+                                        </div>
+                                        <div class="column-cards" id="column-progress">
+                                            <div class="kanban-card" draggable="true" data-task-id="task-4">
+                                                <div class="card-tags">
+                                                    <span class="card-tag tag-orange">Código</span>
+                                                </div>
+                                                <h4>Sincronización WebSockets</h4>
+                                                <p>Mockup de sincronización bidireccional entre la vista móvil y la de escritorio.</p>
+                                                <div class="card-meta">
+                                                    <div class="card-assignee current-user">Tú</div>
+                                                    <span class="card-priority priority-high">Alta</span>
+                                                </div>
+                                            </div>
+                                            <div class="kanban-card" draggable="true" data-task-id="task-5">
+                                                <div class="card-tags">
+                                                    <span class="card-tag tag-purple">Diseño</span>
+                                                </div>
+                                                <h4>Kit de Componentes Híbridos</h4>
+                                                <p>Diseñar sistema UI escalable y exportable para Web, Android e iOS.</p>
+                                                <div class="card-meta">
+                                                    <div class="card-assignee" style="background-color: var(--accent-pink);">E</div>
+                                                    <span class="card-priority priority-medium">Media</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Column 3: Review -->
+                                    <div class="kanban-column" data-status="review">
+                                        <div class="column-header">
+                                            <span class="column-indicator indicator-review"></span>
+                                            <h3>Revisión</h3>
+                                            <span class="column-count" id="count-review">1</span>
+                                        </div>
+                                        <div class="column-cards" id="column-review">
+                                            <div class="kanban-card" draggable="true" data-task-id="task-6">
+                                                <div class="card-tags">
+                                                    <span class="card-tag tag-orange">Código</span>
+                                                </div>
+                                                <h4>Exportador de Layout Grid</h4>
+                                                <p>Convertir los elementos visuales del lienzo directamente a CSS Grid.</p>
+                                                <div class="card-meta">
+                                                    <div class="card-assignee" style="background-color: var(--accent-cyan);">A</div>
+                                                    <span class="card-priority priority-low">Baja</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Column 4: Done -->
+                                    <div class="kanban-column" data-status="done">
+                                        <div class="column-header">
+                                            <span class="column-indicator indicator-done"></span>
+                                            <h3>Finalizado</h3>
+                                            <span class="column-count" id="count-done">1</span>
+                                        </div>
+                                        <div class="column-cards" id="column-done">
+                                            <div class="kanban-card" draggable="true" data-task-id="task-7">
+                                                <div class="card-tags">
+                                                    <span class="card-tag tag-green">A11y</span>
+                                                </div>
+                                                <h4>Soporte para Lectores de Pantalla</h4>
+                                                <p>Añadir atributos ARIA al editor de canvas para accesibilidad completa.</p>
+                                                <div class="card-meta">
+                                                    <div class="card-assignee" style="background-color: var(--accent-lime);">S</div>
+                                                    <span class="card-priority priority-medium">Media</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal for adding a task -->
+                <div class="modal" id="taskModal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>Añadir Nueva Tarea</h3>
+                            <button class="modal-close" id="closeModal">&times;</button>
+                        </div>
+                        <form id="taskForm">
+                            <div class="form-group">
+                                <label for="taskTitle">Título de la Tarea</label>
+                                <input type="text" id="taskTitle" required placeholder="Ej: Maquetar navegación responsive">
+                            </div>
+                            <div class="form-group">
+                                <label for="taskDesc">Descripción</label>
+                                <textarea id="taskDesc" placeholder="Explica detalladamente la meta de esta tarea..."></textarea>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="taskTag">Etiqueta</label>
+                                    <select id="taskTag">
+                                        <option value="Diseño">Diseño</option>
+                                        <option value="Código">Código</option>
+                                        <option value="UX">UX</option>
+                                        <option value="A11y">Accesibilidad</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="taskPriority">Prioridad</label>
+                                    <select id="taskPriority">
+                                        <option value="Baja">Baja</option>
+                                        <option value="Media" selected>Media</option>
+                                        <option value="Alta">Alta</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" id="cancelTaskBtn">Cancelar</button>
+                                <button type="submit" class="btn btn-accent">Guardar Tarea</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab 3: System Themes -->
+            <section id="colors-tab" class="workspace-tab">
+                <div class="colors-container">
+                    <div class="colors-header">
+                        <h2>Sistemas de Diseño Flexibles</h2>
+                        <p>Las herramientas colaborativas de Kaleidos se basan en una estructura cromática adaptable. Configura los colores principales del espacio y pon a prueba su accesibilidad.</p>
+                    </div>
+
+                    <div class="colors-grid">
+                        <!-- Theme Controls -->
+                        <div class="card colors-configurator">
+                            <h3>Configurador de Paleta</h3>
+                            <div class="color-control-item">
+                                <div class="control-label-desc">
+                                    <strong>Color de Fondo Primario</strong>
+                                    <p>Establece el tono base de la interfaz (modo oscuro recomendado).</p>
+                                </div>
+                                <input type="color" id="themeBg" value="#110f18" class="color-picker-circle">
+                            </div>
+                            <div class="color-control-item">
+                                <div class="control-label-desc">
+                                    <strong>Color de Acento Principal</strong>
+                                    <p>Tono principal para botones y estados activos (Penpot Magenta por defecto).</p>
+                                </div>
+                                <input type="color" id="themePrimary" value="#f43f5e" class="color-picker-circle">
+                            </div>
+                            <div class="color-control-item">
+                                <div class="control-label-desc">
+                                    <strong>Color de Acento Secundario</strong>
+                                    <p>Tono secundario para elementos de colaboración activa (Cyan).</p>
+                                </div>
+                                <input type="color" id="themeAccent" value="#06b6d4" class="color-picker-circle">
+                            </div>
+                            <div class="color-control-item">
+                                <div class="control-label-desc">
+                                    <strong>Color de Texto Primario</strong>
+                                    <p>Color de texto principal para maximizar la legibilidad.</p>
+                                </div>
+                                <input type="color" id="themeText" value="#f8fafc" class="color-picker-circle">
+                            </div>
+                            <button class="btn btn-secondary btn-full" id="resetThemeBtn">
+                                <i data-lucide="rotate-ccw"></i>
+                                <span>Restablecer Paleta Original</span>
+                            </button>
+                        </div>
+
+                        <!-- Real-time Accessibility Checker -->
+                        <div class="card accessibility-tester">
+                            <h3>Verificador de Contraste y Accesibilidad (WCAG)</h3>
+                            <div class="test-preview-box" id="testPreviewBox">
+                                <span class="test-accent-text" id="testAccentText">Texto de Acento en Muestra</span>
+                                <p class="test-body-text" id="testBodyText">Este es un párrafo de ejemplo utilizando los colores seleccionados para verificar la legibilidad visual en diferentes pantallas.</p>
+                                <button class="btn btn-primary" id="testBtnSample" style="margin-top: 15px; pointer-events: none;">Botón Muestra</button>
+                            </div>
+                            
+                            <div class="tests-results">
+                                <div class="result-row">
+                                    <span class="result-label">Relación de Contraste (Texto vs Fondo):</span>
+                                    <span class="result-val" id="contrastRatioVal">14.2:1</span>
+                                </div>
+                                <div class="result-indicators">
+                                    <div class="indicator-item">
+                                        <span class="indicator-status status-pass" id="wcagNormalAA">Cumple</span>
+                                        <span class="indicator-label">Texto Normal (AA)</span>
+                                    </div>
+                                    <div class="indicator-item">
+                                        <span class="indicator-status status-pass" id="wcagNormalAAA">Cumple</span>
+                                        <span class="indicator-label">Texto Normal (AAA)</span>
+                                    </div>
+                                    <div class="indicator-item">
+                                        <span class="indicator-status status-pass" id="wcagLargeAA">Cumple</span>
+                                        <span class="indicator-label">Texto Grande (AA)</span>
+                                    </div>
+                                    <div class="indicator-item">
+                                        <span class="indicator-status status-pass" id="wcagLargeAAA">Cumple</span>
+                                        <span class="indicator-label">Texto Grande (AAA)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab 4: Events Hub -->
+            <section id="events-tab" class="workspace-tab">
+                <div class="events-container">
+                    <div class="events-hero">
+                        <div class="events-hero-content">
+                            <span class="hero-tag">COMUNIDAD Y CÓDIGO ABIERTO</span>
+                            <h2>Penpot Design Open Source Events</h2>
+                            <p>En Kaleidos creemos que el software libre cambia las reglas del juego. Participa en hackathones, mesas redondas, talleres interactivos y en nuestro icónico <strong>Penpot Fest</strong> para moldear el futuro de la colaboración multiplataforma.</p>
+                        </div>
+                    </div>
+
+                    <div class="events-layout">
+                        <!-- Upcoming Events Timeline -->
+                        <div class="events-timeline-section">
+                            <h3>Calendario de Eventos 2026</h3>
+                            <div class="timeline">
+                                <div class="timeline-item active-event">
+                                    <div class="timeline-badge"><i data-lucide="users"></i></div>
+                                    <div class="timeline-content">
+                                        <div class="event-meta">
+                                            <span class="event-date">Junio 12-14, 2026</span>
+                                            <span class="event-badge status-upcoming">Próximo</span>
+                                        </div>
+                                        <h4>Penpot Fest 2026: Madrid & Online</h4>
+                                        <p>El evento insignia internacional para diseñadores y desarrolladores de código abierto. Charlas de Figma a SVG, control de versiones para diseño y layouts CSS Grid nativos.</p>
+                                        <div class="event-actions">
+                                            <button class="btn btn-sm btn-accent join-event-btn" data-event="Penpot Fest 2026">Registrarse Gratis</button>
+                                            <span class="attendees-info"><i data-lucide="check"></i> 142 registrándose</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="timeline-item">
+                                    <div class="timeline-badge"><i data-lucide="code-2"></i></div>
+                                    <div class="timeline-content">
+                                        <div class="event-meta">
+                                            <span class="event-date">Julio 25, 2026</span>
+                                            <span class="event-badge status-planning">Planificado</span>
+                                        </div>
+                                        <h4>Hackathon: Herramientas Colaborativas Multiplataforma</h4>
+                                        <p>Crea complementos, plugins o prototipos interactivos en Penpot y Taiga. 48 horas de hackeo intensivo con mentores de Kaleidos.</p>
+                                        <div class="event-actions">
+                                            <button class="btn btn-sm btn-secondary join-event-btn" data-event="Hackathon Multiplataforma">Unirse al Hackathon</button>
+                                            <span class="attendees-info">Premios en metálico y hardware open source</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="timeline-item">
+                                    <div class="timeline-badge"><i data-lucide="video"></i></div>
+                                    <div class="timeline-content">
+                                        <div class="event-meta">
+                                            <span class="event-date">Agosto 08, 2026</span>
+                                            <span class="event-badge status-planning">Planificado</span>
+                                        </div>
+                                        <h4>Taller Online: Accesibilidad Extrema en SVG</h4>
+                                        <p>Descubre técnicas avanzadas para maquetar iconos y gráficos vectoriales interactivos con etiquetas ARIA nativas y soporte para lectores de pantalla.</p>
+                                        <div class="event-actions">
+                                            <button class="btn btn-sm btn-secondary join-event-btn" data-event="Taller SVG A11y">Inscribirse al Taller</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ambassador & Share Card -->
+                        <div class="events-info-sidebar">
+                            <div class="card ambassador-card">
+                                <div class="card-icon-wrapper"><i data-lucide="award"></i></div>
+                                <h3>Programa de Embajadores Kaleidos</h3>
+                                <p>¿Te apasiona el diseño open source? Conviértete en Embajador y organiza talleres locales utilizando Penpot y Taiga en tu universidad, comunidad o empresa. Te apoyamos con merchandising, soporte técnico y formación.</p>
+                                <button class="btn btn-primary btn-full" id="applyAmbassadorBtn">
+                                    <span>Postular como Embajador</span>
+                                </button>
+                            </div>
+
+                            <div class="card stats-card">
+                                <h3>Impacto del Ecosistema</h3>
+                                <div class="stats-grid">
+                                    <div class="stat-item">
+                                        <span class="stat-num">500k+</span>
+                                        <span class="stat-label">Usuarios Activos</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-num">12k+</span>
+                                        <span class="stat-label">Estrellas GitHub</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-num">80+</span>
+                                        <span class="stat-label">Países con Eventos</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-num">100%</span>
+                                        <span class="stat-label">Código Libre</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+        
+        <!-- Global Notification Banner -->
+        <div class="toast-notification" id="toastNotification">
+            <span class="toast-message" id="toastMessage">¡Acción realizada con éxito!</span>
+        </div>
+    </div>
+
+    <!-- Script Entry Point -->
+    <script src="app.js"></script>
+    <div id="debugErrorLog" style="position: fixed; bottom: 20px; left: 20px; background: rgba(220, 38, 38, 0.95); color: #fff; padding: 12px 18px; border-radius: 8px; font-family: monospace; font-size: 11px; z-index: 99999; display: none; max-width: 450px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); pointer-events: auto; line-height: 1.4;"></div>
+</body>
+</html>

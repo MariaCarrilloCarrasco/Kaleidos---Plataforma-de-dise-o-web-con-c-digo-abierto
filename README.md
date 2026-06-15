@@ -1,29 +1,57 @@
-# Kaleidos---Plataforma-de-dise-o-web-con-c-digo-abierto
-En esta página web, podemos crear nuestros diseños web y visualizar, simultáneamente, el código correspondiente en HTML, CSS y Javascript. A su vez, se pueden visualizar las tareas pendientes, en desarrollo y finalizadas, permitiendo añadir otras nuevas. También, permite cambiar los colores, las formas y añadir texto. A su vez, podemos visualizar los eventos disponibles de diseño y apuntarnos a ello.
+# Kaleidos — Plataforma de diseño web con código abierto
 
-**Detalle de cada módulo:**
+**Kaleidos** es una plataforma web interactiva inspirada en los creadores de **Penpot** y **Taiga**. Este proyecto sirve como prototipo funcional de herramientas colaborativas multiplataforma utilizando estándares de código abierto. En esta plataforma, podemos crear nuestros diseños web y visualizar, simultáneamente, el código correspondiente en HTML, CSS y Javascript. A su vez, se pueden visualizar las tareas pendientes, en desarrollo y finalizadas, permitiendo añadir otras nuevas. También permite cambiar los colores, las formas, añadir texto, visualizar los eventos disponibles de diseño y apuntarnos a ellos.
 
-**Lienzo de Diseño (Penpot Board)**: Herramientas de formas, drag-and-drop absoluto, edición directa de texto por doble clic, propiedades y gestión.
+---
 
-**Visualizador simultáneo de código:** Flujo inmediato a HTML/CSS, SVG nativo y exportación JSON, además de copiado rápido.
-Tablero Kanban (Taiga Sync): Interacción HTML5 Drag-and-Drop, creación de tarjetas temáticas y prioritarias.
+## Tecnologías Utilizadas
 
-**Hub de Eventos e Inscripción:** Registro en vivo interactivo con contadores dinámicos y programa de embajadores.
-Centro de Accesibilidad Avanzado (A11y Hub): Simulación del Intérprete (LSE), integración de Cámara Web en tiempo real, lector de pantalla (Hover), traducción automática y manual a Braille, y generación de síntesis de voz y sonidos mediante la API de Audio.
+El proyecto está construido exclusivamente bajo principios de código abierto, con código nativo ligero y de alto rendimiento:
 
-**Personalizador de Temas y Simulador Responsivo:** Simulaciones de pantallas móvil/tablet/desktop, verificador WCAG de contraste sRGB y co-creación virtual activa.
+1. **Capas de Estructura e Interacción (Core):**
+   * **HTML5 Semántico:** Para una estructura de documento robusta, accesible por lectores de pantalla y compatible con SEO.
+   * **SVG (Scalable Vector Graphics):** Para renderizar las figuras del lienzo y la estructura geométrica articulada del avatar del intérprete.
+   * **API de Drag-and-Drop (HTML5):** Permite el arrastre nativo de tarjetas en el tablero de Taiga.
 
-**Listado detallado de Tecnologías:**
+2. **Diseño y Estética (CSS3):**
+   * **CSS3 Vanilla:** Uso extensivo de variables personalizadas (`var()`) para temas oscuros en tiempo real, efectos de desenfoque (*backdrop-filter*) para estética glassmorphism premium, transiciones fluidas y animaciones clave (`keyframes`).
+   * **Joint SVG Transforms:** Uso de `transform-box: fill-box;` y `transform-origin` para rotar las articulaciones de los hombros y codos del avatar sin desalinear su cuerpo.
 
-Core (HTML5, SVG, Drag & Drop)
-Diseño y Estética (CSS3, variables personalizadas, animaciones fluidas, transformaciones SVG)
-Lógica e Inclusión (JavaScript ES6+, Web Audio API para tonos WAV binarios, Web Speech API para lectura y transcripción, MediaDevices API para cámara web)
-Recursos (Lucide Icons, Google Fonts)
-Guía de ejecución local: Manteniendo los métodos recomendados de Node.js, Python o apertura directa.
+3. **Lógica de Aplicación e Inclusión (JavaScript ES6+):**
+   * **Web Audio API:** Generación binaria y dinámica de búferes PCM en formato de datos WAV. Esto garantiza tonos de audio y sonidos de clic rápidos y compatibles sin depender de archivos de audio externos.
+   * **Web Speech API (SpeechSynthesis):** Conversión de texto a voz para la función de Lector Hover en múltiples lenguajes (español/inglés).
+   * **Web Speech API (SpeechRecognition):** Transcripción continua del habla del micrófono a texto escrito en pantalla en tiempo real.
+   * **MediaDevices API (getUserMedia):** Solicitud y renderizado seguro del flujo de video de la cámara web local dentro del avatar.
 
-** Enlace de la página web**: http://localhost:8000/ .
+4. **Recursos y Utilidades:**
+   * **Lucide Icons:** Iconografía moderna y minimalista procesada e inicializada de forma asíncrona mediante el cliente web.
+   * **Google Fonts (Outfit & Inter):** Tipografías modernas que otorgan legibilidad superior y apariencia premium.
 
-**Creadora y diseñadora web**:
-María Carrillo Carrasco
-**Educadora Social, Integradora Social, Social Developer y Diseñadora de Páginas Web**
-FactoríaF5 & UAH (Universidad de Alcalá de Henares).
+---
+
+## Cómo Empezar (Instrucciones)
+
+No se requieren dependencias pesadas ni compiladores complejos. Puedes abrir y ejecutar el proyecto localmente de las siguientes maneras:
+
+### Opción 1: Servidor Local (Recomendado)
+Ejecuta un servidor web simple en el directorio `kaleidos/` desde tu terminal:
+
+**Usando Node.js / npm:**
+```bash
+npx http-server . -p 8000
+```
+o
+```bash
+npx live-server
+```
+
+**Usando Python:**
+```bash
+python -m http.server 8000
+```
+
+Luego abre en tu navegador:
+👉 **[http://localhost:8000](http://localhost:8000)**
+
+### Opción 2: Apertura Directa
+Simplemente haz doble clic en el archivo [index.html](index.html) para abrirlo directamente en cualquier navegador web moderno.
